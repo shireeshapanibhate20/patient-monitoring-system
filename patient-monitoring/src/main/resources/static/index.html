@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Monitoring System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #1f4e79;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 16px;
+            margin-top: 10px;
+            background: #1f4e79;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #163a5c;
+        }
+
+        .vitals {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .vital {
+            padding: 15px;
+            background: #eef5fb;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #status {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid,
+            .vitals {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Patient Monitoring System</h1>
+    <p>Patient Vital Signs Dashboard</p>
+</header>
+
+<div class="container">
+
+    <!-- ADD PATIENT -->
+
+    <div class="card">
+        <h2>Add New Patient</h2>
+
+        <div class="form-grid">
+
+            <input type="text"
+                   id="newName"
+                   placeholder="Patient Name">
+
+            <input type="number"
+                   id="newAge"
+                   placeholder="Age">
+
+            <input type="text"
+                   id="newGender"
+                   placeholder="Gender">
+
+            <input type="text"
+                   id="newPhone"
+                   placeholder="Phone Number">
+
+        </div>
+
+        <button onclick="addPatient()">Add Patient</button>
+
+        <p id="patientMessage" class="message"></p>
+    </div>
+
+
+    <!-- ADD VITAL READING -->
+
+    <div class="card">
+
+        <h2>Add Vital Reading</h2>
+
+        <div class="form-grid">
+
+            <input type="number"
+                   id="vitalPatientId"
+                   placeholder="Patient ID">
+
+            <input type="number"
+                   id="newHeartRate"
+                   placeholder="Heart Rate">
+
+            <input type="number"
+                   step="0.1"
+                   id="newTemperature"
+                   placeholder="Temperature">
+
+            <input type="number"
+                   id="newSpo2"
+                   placeholder="SpO2">
+
+            <input type="text"
+                   id="newBloodPressure"
+                   placeholder="Blood Pressure">
+
+            <input type="number"
+                   id="newRespiratoryRate"
+                   placeholder="Respiratory Rate">
+
+        </div>
+
+        <button onclick="addVital()">Add Vital Reading</button>
+
+        <p id="vitalMessage" class="message"></p>
+
+    </div>
+
+
+    <!-- VIEW PATIENT -->
+
+    <div class="card">
+
+        <h2>View Patient</h2>
+        
+<div class="card">
+    <h2>All Registered Patients</h2>
+
+    <input
+        type="text"
+        id="searchPatient"
+        placeholder="Search by patient name"
+        oninput="filterPatients()"
+    >
+
+    <button onclick="loadAllPatients()">Refresh List</button>
+
+    <div style="overflow-x:auto;">
+        <table border="1" cellpadding="10"
+               style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="patientListBody"></tbody>
+        </table>
+    </div>
+</div>
+
+
+        <input type="number"
+               id="patientId"
+               placeholder="Enter Patient ID">
+
+        <button onclick="loadPatient()">View Patient</button>
+
+        <div id="patientInfo"></div>
+
+    </div>
+
+
+    <!-- LATEST VITALS -->
+
+    <div class="card">
+
+        <h2>Latest Vital Signs</h2>
+
+        <div class="vitals">
+
+            <div class="vital">
+                <h3>Heart Rate</h3>
+                <p id="heartRate">--</p>
+            </div>
+
+            <div class="vital">
+                <h3>Temperature</h3>
+                <p id="temperature">--</p>
+            </div>
+
+            <div class="vital">
+                <h3>SpO₂</h3>
+                <p id="spo2">--</p>
+            </div>
+
+            <div class="vital">
+                <h3>Blood Pressure</h3>
+                <p id="bloodPressure">--</p>
+            </div>
+
+            <div class="vital">
+                <h3>Respiratory Rate</h3>
+                <p id="respiratoryRate">--</p>
+            </div>
+
+        </div>
+
+        <p id="status">Status: --</p>
+        <h2>Vital History</h2>
+
+<table id="historyTable" border="1" cellpadding="10"
+       style="width:100%; border-collapse:collapse;">
+
+    <thead>
+        <tr>
+            <th>Heart Rate</th>
+            <th>Temperature</th>
+            <th>SpO₂</th>
+            <th>Blood Pressure</th>
+            <th>Respiratory Rate</th>
+        </tr>
+    </thead>
+
+    <tbody id="historyBody">
+    </tbody>
+
+</table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+async function addPatient() {
+
+    const patient = {
+
+        name: document.getElementById("newName").value,
+
+        age: parseInt(
+            document.getElementById("newAge").value
+        ),
+
+        gender:
+            document.getElementById("newGender").value,
+
+        phone:
+            document.getElementById("newPhone").value
+    };
+
+
+    try {
+
+        const response = await fetch("/patients", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(patient)
+
+        });
+
+
+        const savedPatient =
+            await response.json();
+
+
+        document.getElementById("patientMessage").innerText =
+            "Patient added successfully. Patient ID: "
+            + savedPatient.id;
+
+
+        document.getElementById("newName").value = "";
+        document.getElementById("newAge").value = "";
+        document.getElementById("newGender").value = "";
+        document.getElementById("newPhone").value = "";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("patientMessage").innerText =
+            "Unable to add patient.";
+
+    }
+
+}
+
+
+
+async function addVital() {
+
+    const vital = {
+
+        patientId:
+            parseInt(
+                document.getElementById(
+                    "vitalPatientId"
+                ).value
+            ),
+
+        heartRate:
+            parseInt(
+                document.getElementById(
+                    "newHeartRate"
+                ).value
+            ),
+
+        temperature:
+            parseFloat(
+                document.getElementById(
+                    "newTemperature"
+                ).value
+            ),
+
+        spo2:
+            parseInt(
+                document.getElementById(
+                    "newSpo2"
+                ).value
+            ),
+
+        bloodPressure:
+            document.getElementById(
+                "newBloodPressure"
+            ).value,
+
+        respiratoryRate:
+            parseInt(
+                document.getElementById(
+                    "newRespiratoryRate"
+                ).value
+            )
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch("/vitals", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify(vital)
+
+            });
+
+
+        await response.json();
+
+
+        document.getElementById(
+            "vitalMessage"
+        ).innerText =
+            "Vital reading added successfully.";
+
+
+        document.getElementById(
+            "patientId"
+        ).value = vital.patientId;
+
+
+        await loadPatient();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "vitalMessage"
+        ).innerText =
+            "Unable to add vital reading.";
+
+    }
+
+}
+
+
+
+async function loadPatient() {
+
+    const patientId =
+        document.getElementById(
+            "patientId"
+        ).value;
+
+
+    if (!patientId) {
+
+        alert(
+            "Please enter a patient ID"
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const patientResponse =
+            await fetch(
+                `/patients/${patientId}`
+            );
+
+
+        const patient =
+            await patientResponse.json();
+
+
+        if (!patient) {
+
+            alert("Patient not found");
+
+            return;
+        }
+
+
+        
+document.getElementById("patientInfo").innerHTML =
+
+    `<h3>${patient.name}</h3>
+     <p>Age: ${patient.age}</p>
+     <p>Gender: ${patient.gender}</p>
+     <p>Phone: ${patient.phone}</p>
+
+     <button onclick="editPatient(${patient.id})">
+         Edit Patient
+     </button>
+
+     <button onclick="deletePatient(${patient.id})">
+         Delete Patient
+     </button>`;
+
+
+        const vitalResponse =
+            await fetch(
+                `/vitals/patient/${patientId}/latest`
+            );
+
+
+        const vital =
+            await vitalResponse.json();
+
+
+        if (vital) {
+
+            document.getElementById(
+                "heartRate"
+            ).innerText =
+                vital.heartRate + " bpm";
+
+
+            document.getElementById(
+                "temperature"
+            ).innerText =
+                vital.temperature + " °C";
+
+
+            document.getElementById(
+                "spo2"
+            ).innerText =
+                vital.spo2 + " %";
+
+
+            document.getElementById(
+                "bloodPressure"
+            ).innerText =
+                vital.bloodPressure;
+
+
+            document.getElementById(
+                "respiratoryRate"
+            ).innerText =
+                vital.respiratoryRate
+                + " /min";
+
+        }
+
+
+
+        const statusResponse =
+            await fetch(
+                `/vitals/patient/${patientId}/status`
+            );
+
+
+        const status =
+            await statusResponse.text();
+
+
+        document.getElementById(
+            "status"
+        ).innerText =
+            "Status: " + status;
+
+await loadVitalHistory(patientId);
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to load patient information."
+        );
+
+    }
+
+}
+async function loadVitalHistory(patientId) {
+
+    const response =
+        await fetch(`/vitals/patient/${patientId}`);
+
+    const readings =
+        await response.json();
+
+    const historyBody =
+        document.getElementById("historyBody");
+
+    historyBody.innerHTML = "";
+
+    readings.forEach(vital => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${vital.heartRate} bpm</td>
+            <td>${vital.temperature} °C</td>
+            <td>${vital.spo2} %</td>
+            <td>${vital.bloodPressure}</td>
+            <td>${vital.respiratoryRate} /min</td>
+        `;
+
+        historyBody.appendChild(row);
+    });
+}
+
+async function editPatient(id) {
+
+    const name = prompt("Enter patient name:");
+    if (name === null) return;
+
+    const age = prompt("Enter patient age:");
+    if (age === null) return;
+
+    const gender = prompt("Enter patient gender:");
+    if (gender === null) return;
+
+    const phone = prompt("Enter phone number:");
+    if (phone === null) return;
+
+    const patient = {
+        name: name,
+        age: Number(age),
+        gender: gender,
+        phone: phone
+    };
+
+    try {
+        const response = await fetch(`/patients/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(patient)
+        });
+
+        if (!response.ok) {
+            alert("Unable to update patient.");
+            return;
+        }
+
+        document.getElementById("patientId").value = id;
+        await loadPatient();
+
+        alert("Patient updated successfully!");
+
+    } catch (error) {
+        console.error(error);
+        alert("Error updating patient.");
+    }
+}
+
+
+async function deletePatient(id) {
+
+    const confirmed = confirm(
+        "Are you sure you want to delete this patient?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`/patients/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            alert("Unable to delete patient.");
+            return;
+        }
+
+        document.getElementById("patientInfo").innerHTML = "";
+        document.getElementById("patientId").value = "";
+
+        document.getElementById("heartRate").innerText = "--";
+        document.getElementById("temperature").innerText = "--";
+        document.getElementById("spo2").innerText = "--";
+        document.getElementById("bloodPressure").innerText = "--";
+        document.getElementById("respiratoryRate").innerText = "--";
+        document.getElementById("status").innerText = "Status: --";
+        document.getElementById("historyBody").innerHTML = "";
+
+        alert("Patient deleted successfully!");
+
+    } catch (error) {
+        console.error(error);
+        alert("Error deleting patient.");
+    }
+}
+
+let allPatients = [];
+
+async function loadAllPatients() {
+    try {
+        const response = await fetch("/patients");
+
+        if (!response.ok) {
+            throw new Error("Could not load patients");
+        }
+
+        allPatients = await response.json();
+        filterPatients();
+
+    } catch (error) {
+        console.error(error);
+        alert("Unable to load patient list.");
+    }
+}
+
+function filterPatients() {
+    const search = document
+        .getElementById("searchPatient")
+        .value.toLowerCase();
+
+    const filtered = allPatients.filter(patient =>
+        (patient.name || "").toLowerCase().includes(search)
+    );
+
+    const tbody = document.getElementById("patientListBody");
+    tbody.replaceChildren();
+
+    filtered.forEach(patient => {
+        const row = document.createElement("tr");
+
+        [
+            patient.id,
+            patient.name,
+            patient.age,
+            patient.gender
+        ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value ?? "";
+            row.appendChild(cell);
+        });
+
+        const actionCell = document.createElement("td");
+        const button = document.createElement("button");
+
+        button.textContent = "View";
+        button.onclick = () => {
+            document.getElementById("patientId").value = patient.id;
+            loadPatient();
+        };
+
+        actionCell.appendChild(button);
+        row.appendChild(actionCell);
+        tbody.appendChild(row);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadAllPatients);
+
+</script>
+
+</body>
+</html>
